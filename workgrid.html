@@ -135,6 +135,48 @@
             border-radius: 6px;
             display: inline-block;
         }
+
+        /* Mobile Responsiveness Overrides */
+        @media (max-width: 768px) {
+            .text-\[64px\] {
+                font-size: 34px !important;
+                line-height: 1.25 !important;
+            }
+            .text-\[40px\] {
+                font-size: 20px !important;
+                line-height: 28px !important;
+            }
+            .text-\[32px\] {
+                font-size: 18px !important;
+                line-height: 26px !important;
+            }
+            .py-\[94px\] {
+                padding-top: 40px !important;
+                padding-bottom: 40px !important;
+            }
+            .px-\[80px\] {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+            /* Flex layouts wrap on mobile */
+            .flex.items-center.gap-\[30px\] {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 24px !important;
+            }
+            .w-\[70\%\], .w-\[30\%\] {
+                width: 100% !important;
+            }
+            /* Safe Image Scaling */
+            section img {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            /* Hidden br tags on mobile to let text flow naturally */
+            br {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -457,19 +499,24 @@
             });
         });
 
-        // Section & Element Reveals
+        // Premium staggered reveals for section contents
         document.querySelectorAll('section').forEach(section => {
-            gsap.from(section, {
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                },
-                y: 40,
-                opacity: 0,
-                duration: 1.2,
-                ease: "power3.out"
-            });
+            // Target elements inside sections to reveal incrementally
+            const elementsToAnimate = section.querySelectorAll('h1, h2, h3, p, li, img');
+            if (elementsToAnimate.length > 0) {
+                gsap.from(elementsToAnimate, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    },
+                    y: 30,
+                    opacity: 0,
+                    duration: 1.2,
+                    stagger: 0.12,
+                    ease: "power3.out"
+                });
+            }
         });
 
         // 3D Phone Tilt Tracking
