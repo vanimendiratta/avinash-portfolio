@@ -159,6 +159,30 @@
         #about-nav a {
             color: #ffffff !important;
         }
+
+        /* Mobile Responsiveness for Navigation Bar */
+        @media (max-width: 768px) {
+            #about-nav {
+                margin: 5px !important;
+                padding: 8px 12px !important;
+                width: calc(100% - 10px) !important;
+                border-radius: 12px !important;
+            }
+            #about-nav .w-full {
+                flex-direction: column !important;
+                gap: 12px !important;
+                align-items: center !important;
+            }
+            #about-nav a[href="index.html"] {
+                padding-left: 0 !important;
+            }
+            #about-nav .absolute {
+                position: relative !important;
+                left: auto !important;
+                transform: none !important;
+                margin-top: 4px !important;
+            }
+        }
     </style>
 </head>
 
@@ -171,7 +195,7 @@
 
 
     <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-xl shadow-black/5 flex items-center border border-gray-100" style="margin: 10px; padding: 15px; border-radius: 20px; width: calc(100% - 20px);">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-xl shadow-black/5 flex items-center border border-gray-100" id="about-nav" style="margin: 10px; padding: 15px; border-radius: 20px; width: calc(100% - 20px);">
         <div class="w-full flex items-center justify-between relative">
             <a href="index.html" style="text-decoration: none; display: flex; align-items: center; padding-left: 110px;"><img src="./images/logo.png" alt="AB Logo" style="height: 32px; width: auto;"></a>
             <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 bg-[#2757D9] px-4 py-2 rounded-[50px]">
