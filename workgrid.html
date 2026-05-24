@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workgrid Case Study | Centralized Employee Intelligence</title>
+    <meta name="description"
+        content="Case study of Workgrid — a centralized employee intelligence portal designed to consolidate visual graphics and data management for 100% client health visibility.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;950&display=swap"
+        rel="stylesheet">
+
+    <!-- Smooth Scroll & Animations -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        gallery: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        manrope: ['Manrope', 'sans-serif'],
+                        display: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        body: ['Manrope', 'sans-serif'],
+                        outfit: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#0A0A0A',
+                            blue: '#2563eb',
+                            purple: '#8b5cf6',
+                            purpleDark: '#7c3aed',
+                            purpleLight: '#f3e8ff',
+                        },
+                        accent: '#f97316',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #FAFAFA;
+            color: #111;
+            overflow-x: hidden;
+        }
+
+        .font-gallery {
+            font-family: 'Gallery', 'Gallery Modern', 'Playfair Display', serif;
+        }
+
+        .font-manrope {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        html.lenis {
+            height: auto;
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            width: 8px;
+            height: 8px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        #cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        /* Reveal animations */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* Perspective for 3D tilts */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        /* Highlight classes */
+        .purple-highlight {
+            background: linear-gradient(120deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+            padding: 2px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body class="selection:bg-brand-purple selection:text-white">
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-follower">
+        <span class="cursor-text text-[10px] font-bold text-brand-purple uppercase hidden">View</span>
+    </div>
+
+
+
+    <!-- HERO HEADER / COVER BLOCK -->
+    <section class=" w-full bg-white">
+        <div class="w-full h-[65vh] overflow-hidden relative">
+            <img src="./images/workgrid.png" alt="Workgrid physical workspace display"
+                class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- PROJECT OVERVIEW -->
+    <section class="py-[94px] px-[80px] bg-white relative z-10" id="overview">
+        <div>
+            <div class="flex items-center gap-[30px]">
+                <!-- Left Side: Overview Details -->
+                <div class="w-[70%]">
+                    <div>
+                        <h1 class="font-bold text-[32px] text-[#1A1A1A] mb-[22px]">
+                            Project Overview
+                        </h1>
+                        <p class="text-[32px] font-semibold text-[#3A3A3A]">
+                            I designed a centralized Project Intelligence Module for Work Grid, a <br>
+                            comprehensive task management platform. The goal was to eliminate <br>
+                            high level blind spots for management by providing 100% visibility <br>
+                            into project health, resource allocation, and delay analytics.
+                        </p>
+                    </div>
+                    <div class="mt-[32px]">
+                        <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                            The Problem Statement
+                        </h3>
+                        <p class="text-[32px]  text-[#3A3A3A]">
+                            The management team lacked a bird's-eye view of office productivity. Tracking multiple
+                            projects across different teams was chaotic.
+                        </p>
+                        <p class="text-[32px] mt-[32px]  text-[#3A3A3A]">
+                            <b>Problem:</b> Managers couldn't see <b>why projects were delayed or who
+                                <br>
+                                was specifically responsible for which part of a group task.</b>
+                        </p>
+                    </div>
+                    <div class="mt-[32px]">
+                        <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                            Goal
+                        </h3>
+                        <p class="text-[32px]  text-[#3A3A3A]">
+                            <b>Project Health:</b> On-time vs. Delayed status.
+                        </p>
+                        <p class="text-[32px] mt-[16px]  text-[#3A3A3A]">
+                            <b>Resource Depth:</b> Individual contributions within group projects.
+                        </p>
+                        <p class="text-[32px] mt-[16px]  text-[#3A3A3A]">
+                            <b>Time Analytics:</b> Time spent vs. remaining time vs. original deadlines.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Right Side: Collaboration details -->
+                <div class="w-[30%]">
+                    <img src="./images/collaboration.png" alt="">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- TWO LAPTOPS OVERVIEW -->
+    <section class="w-full h-full">
+        <img src="./images/2laptop.png" alt="">
+    </section>
+
+    <!-- Process -->
+    <section class="w-full h-full">
+        <img src="./images/process.png" alt="">
+    </section>
+
+
+    <!-- STRATEGIC RESEARCH: INTERNAL STAKEHOLDER WORKSHOPS -->
+    <section class="py-[94px] px-[80px] bg-white" id="research">
+        <div>
+            <div class="space-y-10">
+                <!-- Heading -->
+                <div>
+                    <span class="purple-highlight text-[64px] font-bold text-[#1A1A1A] leading-[1.25] mb-6">
+                        Strategic Research: Internal Stakeholder Workshops
+                    </span>
+                    <p class="font-semibold text-[40px] text-[#3A3A3A]">
+                        In this project, research was conducted through high intensity Collaborative Discussion Sessions.
+                    </p>
+                </div>
+
+                <div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                        The Process
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                        I worked closely with a core group of <b>10 key stakeholders, including the Manager and Team
+                            Leads</b>.
+                    </p>
+                </div>
+
+                <div class="mt-[40px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                        Filtering Feedback
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                        My role was to <b>filter diverse opinions into a single, logical framework</b>. Through constant
+                        dialogue,
+                        <b>we <br>identified that the Reason for Delay</b> was the most critical data point missing from
+                        current tools.</b>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+ <!-- TWO Tabs OVERVIEW -->
+    <section class="w-full h-full">
+        <img src="./images/2tabs.png" alt="">
+    </section>
+
+
+    <!-- Wireframe Iteration -->
+ <section class="py-[94px] px-[80px] bg-white" id="research">
+        <div>
+            <div class="space-y-10">
+                <!-- Heading -->
+                <div>
+                    <span class="purple-highlight text-[64px] font-bold text-[#1A1A1A] leading-[1.25] mb-6">
+                        Wireframes Iteration
+                    </span>
+                    <p class=" text-[40px] text-[#3A3A3A]">
+                        Before moving to high-fidelity, I focused on Information Architecture.</p>
+                </div>
+
+                <div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                       Iterative Logic
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                        We went through multiple rounds of wireframe feedback. We stripped away <b>unnecessary clutter</b>, ensuring that even with high data density, <b>the manager could find key information in under 3 seconds.</b>
+                    </p>
+                </div>
+
+                <div class="mt-[40px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                        Refining the Flow
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                        We iterated specifically on the <b>Group Project View</b> to show the hierarchy of tasks without making the screen feel overcrowded.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+     <!-- four frames OVERVIEW -->
+    <section class="w-full h-full">
+        <img src="./images/4frame.png" alt="">
+    </section>
+
+
+    <!-- High Fidelity UI & System Architecture -->
+    <section class="py-[94px] px-[80px] bg-[#F4F2FF]" id="research">
+        <div>
+            <div class="space-y-10">
+                <!-- Heading -->
+                <div>
+                    <span class="bg-[#DFD6F1] p-[10px] rounded-[10px] text-[64px] font-bold text-[#1A1A1A] leading-[1.25] mb-6">
+                        High Fidelity UI & System Architecture
+                    </span>
+                    <p class=" text-[40px] mt-[40px] text-[#3A3A3A]">
+                       Once the logic was mapped, <b>I transitioned into High-Fidelity Design</b>, focusing on high information density and functional precision. <b>I engineered a sophisticated AI Analyst Module</b> that goes beyond data storage to provide deep semantic understanding of every interaction
+                    </p>
+                </div>
+
+               
+            </div>
+        </div>
+    </section>
+
+
+     <!-- fidelity image -->
+    <section class="w-full h-full">
+        <img src="./images/fidelity-hi.png" alt="">
+    </section>
+
+    <!-- AI ANALYST MODULE OVERVIEW -->
+    <section class="w-full h-full">
+        <img src="./images/ai-analyst.png" alt="">
+    </section>
+
+    <!-- High Fidelity UI & System Architecture -->
+    <section class="py-[94px] px-[80px] bg-[#F4F2FF]" id="research">
+        <div>
+            <div class="space-y-10">
+                <!-- Heading -->
+                <div>
+                    <span class="bg-[#DFD6F1] p-[10px] rounded-[10px] text-[64px] font-bold text-[#1A1A1A] leading-[1.25] mb-6">
+                        Project Impact
+                    </span>
+                </div>
+<div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                       40% Reduction in Meeting Duration
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                       By automating status updates through the dashboard, <b>we eliminated the need for manual status-check meetings</b>, saving leadership roughly 5 hours per week.</p>
+                </div>
+
+                <div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                       100% Operational Transparency
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                     Replaced scattered manual tracking with a centralized system, resulting in <b>zero blind spots</b> regarding project delays or resource allocation.</p>
+                </div>
+
+                <div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                      25% Improvement in Deadline Accuracy
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                    With real time Time Consumed vs. Remaining tracking, the <b>team saw a significant increase in hitting original project milestones.</b></p>
+                </div>
+
+                <div class="mt-[32px]">
+                    <h3 class="text-[32px] font-bold text-[#3A3A3A] mb-[16px]">
+                     10-Person Team Optimization:
+                    </h3>
+                    <p class="text-[32px]  text-[#3A3A3A]">
+                     Successfully mapped workloads for the entire core team, <b>ensuring 100% resource visibility</b> and preventing burnout through balanced task distribution.</p>
+                </div>
+               
+            </div>
+        </div>
+    </section>
+
+      <!-- footer image -->
+    <section class="w-full h-full">
+        <img src="./images/prodfooter.png" alt="">
+    </section>
+
+    <!-- Interactive Scripting -->
+    <script>
+        // Initialize Lenis Smooth Scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // GSAP ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor Follower
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+        const cursorText = follower.querySelector('.cursor-text');
+
+        let mouseX = 0, mouseY = 0, followerX = 0, followerY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            gsap.to(cursor, { x: mouseX, y: mouseY, duration: 0.05 });
+        });
+
+        function updateFollower() {
+            followerX += (mouseX - followerX) * 0.15;
+            followerY += (mouseY - followerY) * 0.15;
+            gsap.set(follower, { x: followerX - 20, y: followerY - 20 });
+            requestAnimationFrame(updateFollower);
+        }
+        updateFollower();
+
+        // Cursor interactions
+        document.querySelectorAll('a, button, table, .phone-tilt-card, .glass-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursor, { scale: 3, opacity: 0.3 });
+                gsap.to(follower, { scale: 1.3, borderColor: '#8b5cf6' });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursor, { scale: 1, opacity: 1 });
+                gsap.to(follower, { scale: 1, borderColor: 'rgba(139, 92, 246, 0.5)' });
+            });
+        });
+
+        // Magnet Buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                gsap.to(btn, {
+                    x: (e.clientX - rect.left - rect.width / 2) * 0.3,
+                    y: (e.clientY - rect.top - rect.height / 2) * 0.3,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // Section & Element Reveals
+        document.querySelectorAll('section').forEach(section => {
+            gsap.from(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                y: 40,
+                opacity: 0,
+                duration: 1.2,
+                ease: "power3.out"
+            });
+        });
+
+        // 3D Phone Tilt Tracking
+        document.querySelectorAll('.phone-tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+                const rotateX = -(y - yc) / 8;
+                const rotateY = (x - xc) / 8;
+                gsap.to(card, {
+                    rotateX: rotateX,
+                    rotateY: rotateY,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    rotateX: 0,
+                    rotateY: 0,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.3)"
+                });
+            });
+        });
+
+        console.log("Workgrid engine loaded.");
+    </script>
+</body>
+
+</html>

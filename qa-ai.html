@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA/AI Case Study | Automated Quality & Visual Verification</title>
+    <meta name="description" content="Case study of QA/AI — an AI-powered system designed to automate visual quality control, quality control, and data verification for large-scale operations.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;950&display=swap" rel="stylesheet">
+
+    <!-- Smooth Scroll & Animations -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        gallery: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        manrope: ['Manrope', 'sans-serif'],
+                        display: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        body: ['Manrope', 'sans-serif'],
+                        outfit: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#0A0A0A',
+                            blue: '#2563eb',
+                            blueDark: '#1d4ed8',
+                            blueLight: '#dbeafe',
+                            teal: '#14b8a6',
+                            tealLight: '#ccfbf1',
+                        },
+                        accent: '#f97316',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Manrope', sans-serif; background: #FAFAFA; color: #111; overflow-x: hidden; }
+        .font-gallery {
+            font-family: 'Gallery', 'Gallery Modern', 'Playfair Display', serif;
+        }
+        .font-manrope {
+            font-family: 'Manrope', sans-serif;
+        }
+        html.lenis { height: auto; }
+
+        /* Custom Cursor */
+        #cursor {
+            width: 8px; height: 8px;
+            background: #2563eb;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        #cursor-follower {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(37, 99, 235, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        /* Reveal animations */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* Perspective for 3D tilts */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        /* Highlight classes */
+        .blue-highlight {
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0.05) 100%);
+            padding: 2px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-blue selection:text-white">
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-follower">
+        <span class="cursor-text text-[10px] font-bold text-brand-blue uppercase hidden">View</span>
+    </div>
+
+    <!-- NAV -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-xl shadow-black/5 flex items-center border border-gray-100" style="margin: 10px; padding: 15px; border-radius: 20px; width: calc(100% - 20px);">
+        <div class="w-full flex items-center justify-between relative">
+            <a href="index.html" style="text-decoration: none; display: flex; align-items: center; padding-left: 110px;"><img src="./images/logo.png" alt="AB Logo" style="height: 32px; width: auto;"></a>
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 bg-[#2757D9] px-4 py-2 rounded-[50px]">
+                <a href="index.html" style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">Home</a>
+                <a href="graphics.html" style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">Graphics</a>
+                <a href="about.html" style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">About</a>
+                <a href="ai-writing.html" style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">AI Writing</a>
+            </div>
+            <div class="w-8 h-8 opacity-0 pointer-events-none"></div>
+        </div>
+    </nav>
+
+    <!-- HERO HEADER / COVER BLOCK -->
+    <section class="pt-32 w-full bg-white relative flex flex-col items-center">
+        <!-- Giant background outlined title -->
+        <div class="absolute top-16 font-display text-[150px] md:text-[220px] font-extrabold text-gray-100 select-none tracking-tighter leading-none z-0">
+            QA/AI
+        </div>
+        
+        <!-- Portrait Tablet Mockup Held in Hands -->
+        <div class="w-full max-w-lg px-6 relative z-10 drop-shadow-3xl hover:scale-[1.01] transition-transform duration-500 mt-10">
+            <div class="relative bg-zinc-950 p-2.5 pb-4 rounded-[40px] border border-zinc-800 shadow-2xl">
+                <img src="./images/qa_hero.png" alt="QA/AI tablet dashboard held by hands" class="w-full h-auto rounded-[32px]">
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECT OVERVIEW -->
+    <section class="py-24 px-8 md:px-16 bg-white relative z-10" id="overview">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-12 gap-16 items-start">
+                <!-- Left Side: Overview Details -->
+                <div class="lg:col-span-8 space-y-10">
+                    <div>
+                        <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brand-black tracking-tight uppercase mb-8">
+                            Project Overview
+                        </h1>
+                        <p class="text-gray-600 text-lg md:text-xl font-body leading-relaxed max-w-3xl">
+                            QA/AI is an AI-powered system designed to automate visual graphics, quality control, and data verification for large-scale operations. The platform consolidates diverse datasets and delivers 100% real-time client health and task transparency.
+                        </p>
+                    </div>
+
+                    <!-- Problem statement -->
+                    <div class="border-t border-gray-100 pt-8 space-y-4">
+                        <h3 class="font-outfit text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">The Problem Statement</h3>
+                        <p class="text-gray-600 text-base leading-relaxed">
+                            Legacy QA pipelines relied heavily on manual spot checks, creating severe bottlenecks, long verification loops, and a lack of unified client dashboards.
+                        </p>
+                    </div>
+
+                    <!-- Problem details -->
+                    <div class="space-y-3">
+                        <h4 class="font-outfit text-base font-bold text-brand-black flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Problem:
+                        </h4>
+                        <p class="text-gray-600 text-base leading-relaxed pl-3.5">
+                            Managers and QA teams couldn't visually trace error patterns, track workload in real time, or proactively manage SLA compliance.
+                        </p>
+                    </div>
+
+                    <!-- Tool list -->
+                    <div class="space-y-4 pt-4">
+                        <h4 class="font-outfit text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Tool</h4>
+                        <div class="grid sm:grid-cols-3 gap-6">
+                            <div class="p-5 bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                <div class="text-brand-blue text-lg font-bold">✦ Flowchart</div>
+                                <div class="text-xs text-gray-500 font-medium">To outline automated client status</div>
+                            </div>
+                            <div class="p-5 bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                <div class="text-brand-blue text-lg font-bold">✦ Graphs</div>
+                                <div class="text-xs text-gray-500 font-medium">In-depth trend analysis to isolate pain points</div>
+                            </div>
+                            <div class="p-5 bg-gray-50 border border-gray-100 rounded-2xl space-y-2">
+                                <div class="text-brand-blue text-lg font-bold">✦ Time-discipline</div>
+                                <div class="text-xs text-gray-500 font-medium">Simple setup, intuitive dashboards, and visual KPIs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Collaboration details -->
+                <div class="lg:col-span-4 bg-gray-50 border border-gray-200/60 rounded-[32px] p-8 md:p-10 sticky top-32">
+                    <h3 class="font-display text-2xl font-bold text-brand-black mb-6 border-b border-gray-200/50 pb-4">
+                        Team Collaboration
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Product Owner</div>
+                            <div class="text-base text-gray-700 font-semibold font-body">Client Partner & Business Lead</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">QA Architect</div>
+                            <div class="text-base text-gray-700 font-semibold font-body">Automated Verification pipelines</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Frontend Engineering</div>
+                            <div class="text-base text-gray-700 font-semibold font-body">Lead Frontend Developer</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Design System</div>
+                            <div class="text-base text-gray-700 font-semibold font-body">Visual token Architect</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHOTOREALISTIC OFFICE specialists BANNER -->
+    <section class="w-full">
+        <div class="w-full h-[55vh] overflow-hidden relative border-y border-gray-200">
+            <img src="./images/qa_office.png" alt="QA specialists office banner" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- METRICS CURVE LINE CHART -->
+    <section class="py-24 px-8 md:px-16 bg-white overflow-hidden" id="metrics-curve">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-4">
+                <span class="blue-highlight font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Operational Curve</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-black tracking-tight">
+                    User Dynamic Influence: Impact on QA Speed & Accuracy
+                </h2>
+            </div>
+
+            <!-- SVG Line Graph -->
+            <div class="bg-gray-50 border border-gray-200 rounded-[40px] p-8 md:p-12 relative shadow-inner">
+                <div class="relative w-full aspect-[21/9]">
+                    <svg viewBox="0 0 1000 400" class="w-full h-full select-none">
+                        <!-- Grid Lines -->
+                        <line x1="100" y1="350" x2="900" y2="350" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5"></line>
+                        <line x1="100" y1="250" x2="900" y2="250" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5"></line>
+                        <line x1="100" y1="150" x2="900" y2="150" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5"></line>
+                        <line x1="100" y1="50" x2="900" y2="50" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5 5"></line>
+                        
+                        <!-- Connecting Curve Path -->
+                        <path d="M 150,320 Q 350,280 550,160 T 850,70" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        
+                        <!-- Pulsing Markers & Labels -->
+                        <!-- Node 1 -->
+                        <g class="cursor-pointer group">
+                            <circle cx="150" cy="320" r="10" fill="#2563eb" stroke="white" stroke-width="3"></circle>
+                            <circle cx="150" cy="320" r="20" fill="#2563eb" opacity="0.15" class="animate-ping"></circle>
+                            <text x="150" y="360" font-family="Outfit" font-size="12" font-weight="bold" fill="#0A0A0A" text-anchor="middle">Manual Pipelines</text>
+                            <text x="150" y="375" font-family="DM Sans" font-size="10" fill="#6b7280" text-anchor="middle">(8 hours loop)</text>
+                        </g>
+
+                        <!-- Node 2 -->
+                        <g class="cursor-pointer group">
+                            <circle cx="380" cy="270" r="10" fill="#2563eb" stroke="white" stroke-width="3"></circle>
+                            <text x="380" y="310" font-family="Outfit" font-size="12" font-weight="bold" fill="#0A0A0A" text-anchor="middle">Visual Integrations</text>
+                            <text x="380" y="325" font-family="DM Sans" font-size="10" fill="#6b7280" text-anchor="middle">(4 hours loop)</text>
+                        </g>
+
+                        <!-- Node 3 -->
+                        <g class="cursor-pointer group">
+                            <circle cx="610" cy="140" r="10" fill="#2563eb" stroke="white" stroke-width="3"></circle>
+                            <text x="610" y="100" font-family="Outfit" font-size="12" font-weight="bold" fill="#0A0A0A" text-anchor="middle">Automation Triggers</text>
+                            <text x="610" y="85" font-family="DM Sans" font-size="10" fill="#6b7280" text-anchor="middle">(1 hour loop)</text>
+                        </g>
+
+                        <!-- Node 4 -->
+                        <g class="cursor-pointer group">
+                            <circle cx="850" cy="70" r="10" fill="#2563eb" stroke="white" stroke-width="3"></circle>
+                            <circle cx="850" cy="70" r="20" fill="#2563eb" opacity="0.15" class="animate-ping"></circle>
+                            <text x="850" y="40" font-family="Outfit" font-size="12" font-weight="bold" fill="#2563eb" text-anchor="middle">Real-Time QA/AI</text>
+                            <text x="850" y="25" font-family="DM Sans" font-size="10" fill="#6b7280" text-anchor="middle">(Instant loop)</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIME SAVING JOURNEY / DOUBLE specialists PHOTO GRID -->
+    <section class="py-24 px-8 md:px-16 bg-gray-50 border-y border-gray-100 overflow-hidden" id="saving-journey">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Text Header -->
+            <div class="max-w-3xl space-y-6">
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-brand-black tracking-tight leading-[1.15]">
+                    Beyond the Pixel: The Journey to 70% Time Saving
+                </h2>
+                <p class="text-gray-500 text-lg md:text-xl font-body leading-relaxed">
+                    Discovering how automating repetitive checks and visual audits frees up human talent to focus on high-impact strategic improvements.
+                </p>
+                <div class="text-xs text-gray-400 font-bold uppercase tracking-widest">Discovery, Design and Delivery</div>
+            </div>
+
+            <!-- Double Mockup Image Grid -->
+            <div class="rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
+                <img src="./images/qa_journey.png" alt="QA journey specialists side-by-side display" class="w-full h-auto object-cover">
+            </div>
+        </div>
+    </section>
+
+    <!-- TIMELINE PROCESS DIAGRAM -->
+    <section class="py-24 px-8 md:px-16 bg-white relative overflow-hidden" id="process-flow">
+        <div class="max-w-7xl mx-auto">
+            <!-- Timeline flowchart grid -->
+            <div class="relative py-12 px-6 bg-gray-50 border border-gray-200/50 rounded-[40px] shadow-inner">
+                <div class="grid md:grid-cols-3 gap-12 relative z-10">
+                    <!-- Discovery -->
+                    <div class="space-y-6 text-center md:text-left relative">
+                        <div class="font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Phase 01</div>
+                        <h3 class="font-display text-2xl font-bold text-brand-black border-b border-gray-200 pb-3">Discovery</h3>
+                        <div class="bg-white p-6 rounded-3xl border border-gray-150 shadow-sm space-y-4 hover:-translate-y-1 transition-transform">
+                            <span class="px-3 py-1 rounded bg-blue-100 text-[10px] font-bold text-brand-blue uppercase tracking-wider">Research</span>
+                            <h4 class="font-outfit font-bold text-base mt-2">Stakeholder Workshops</h4>
+                            <p class="text-xs text-gray-500 font-medium">Deep-diving into legacy pipeline roadblocks and manual spot-checking inefficiencies.</p>
+                        </div>
+                    </div>
+
+                    <!-- Design -->
+                    <div class="space-y-6 text-center md:text-left relative">
+                        <div class="font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Phase 02</div>
+                        <h3 class="font-display text-2xl font-bold text-brand-black border-b border-gray-200 pb-3">Design</h3>
+                        <div class="bg-white p-6 rounded-3xl border border-gray-150 shadow-sm space-y-4 hover:-translate-y-1 transition-transform">
+                            <span class="px-3 py-1 rounded bg-blue-100 text-[10px] font-bold text-brand-blue uppercase tracking-wider">Design</span>
+                            <h4 class="font-outfit font-bold text-base mt-2">Automated Token Systems</h4>
+                            <p class="text-xs text-gray-500 font-medium">Standardizing UI badge guidelines, color systems, and density blueprints.</p>
+                        </div>
+                    </div>
+
+                    <!-- Delivery -->
+                    <div class="space-y-6 text-center md:text-left relative">
+                        <div class="font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Phase 03</div>
+                        <h3 class="font-display text-2xl font-bold text-brand-black border-b border-gray-200 pb-3">Delivery</h3>
+                        <div class="bg-white p-6 rounded-3xl border border-gray-150 shadow-sm space-y-4 hover:-translate-y-1 transition-transform">
+                            <span class="px-3 py-1 rounded bg-blue-100 text-[10px] font-bold text-brand-blue uppercase tracking-wider">Deployment</span>
+                            <h4 class="font-outfit font-bold text-base mt-2">Deployment & Validation</h4>
+                            <p class="text-xs text-gray-500 font-medium">Integrating automated visual models into core production branches.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Background grid lines -->
+                <div class="absolute inset-0 grid grid-cols-6 pointer-events-none opacity-20">
+                    <div class="border-r border-gray-300 h-full"></div>
+                    <div class="border-r border-gray-300 h-full"></div>
+                    <div class="border-r border-gray-300 h-full"></div>
+                    <div class="border-r border-gray-300 h-full"></div>
+                    <div class="border-r border-gray-300 h-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STAKEHOLDER FEEDBACK & SYSTEM DESIGN METRICS -->
+    <section class="py-24 px-8 md:px-16 bg-gray-50 border-y border-gray-100" id="design-system">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-6">
+                <span class="blue-highlight font-display text-3xl md:text-4xl lg:text-5xl font-bold text-brand-black tracking-tight leading-[1.25]">
+                    Measuring Product Design System Performance
+                </span>
+                <p class="text-gray-600 text-lg md:text-xl font-body leading-relaxed max-w-4xl">
+                    QA/AI is built upon a standardized design system that ensures consistency, high rendering speeds, and seamless component updates.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 pt-4">
+                <!-- Feedback Loops -->
+                <div class="space-y-4 p-8 bg-white border border-gray-150 rounded-[32px] shadow-sm">
+                    <h4 class="font-outfit text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Feedback Loop</h4>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        Conducted workshops with <strong class="text-brand-black font-semibold">10 design system engineers</strong> and developers to test components.
+                    </p>
+                </div>
+
+                <!-- System Metrics -->
+                <div class="space-y-4 p-8 bg-white border border-gray-150 rounded-[32px] shadow-sm">
+                    <h4 class="font-outfit text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">System Metrics</h4>
+                    <p class="text-gray-600 text-base leading-relaxed">
+                        Performance metrics tracked: Component render times, library load speeds, and consistency across platforms. High rendering speeds were key.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DOUBLE LAPTOP MOCKUP SHOWCASE -->
+    <section class="py-24 px-8 bg-white overflow-hidden" id="laptop-mockups">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
+            <!-- Laptop Mockup 1 -->
+            <div class="rounded-2xl border border-gray-200 shadow-2xl overflow-hidden bg-white hover:scale-[1.01] transition-transform duration-500">
+                <!-- Header -->
+                <div class="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
+                    <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                    <div class="flex-1 bg-white mx-4 rounded-md py-0.5 text-center text-[10px] text-gray-400 font-mono">qa.ai/system/tokens</div>
+                </div>
+                <!-- Content -->
+                <div class="p-6 space-y-6">
+                    <h4 class="font-display font-bold text-lg text-brand-black">Component Performance Scale</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                            <div class="text-[9px] text-gray-400 font-bold uppercase">Average Render</div>
+                            <div class="text-lg font-bold text-brand-blue mt-1">12ms</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                            <div class="text-[9px] text-gray-400 font-bold uppercase">Token Sync</div>
+                            <div class="text-lg font-bold text-brand-blue mt-1">100%</div>
+                        </div>
+                    </div>
+                    <!-- Blueprint visual -->
+                    <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/50 space-y-3">
+                        <div class="text-[9px] text-gray-400 font-bold uppercase">Visual Rendering Steps</div>
+                        <div class="h-10 w-full bg-blue-100/50 border border-dashed border-blue-300 rounded flex items-center justify-center text-[10px] text-brand-blue font-mono font-bold">
+                            TOKEN ENGINE ACTIVE
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Laptop Mockup 2 -->
+            <div class="rounded-2xl border border-gray-200 shadow-2xl overflow-hidden bg-white hover:scale-[1.01] transition-transform duration-500">
+                <!-- Header -->
+                <div class="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
+                    <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                    <div class="flex-1 bg-white mx-4 rounded-md py-0.5 text-center text-[10px] text-gray-400 font-mono">qa.ai/system/verification</div>
+                </div>
+                <!-- Content -->
+                <div class="p-6 space-y-6">
+                    <h4 class="font-display font-bold text-lg text-brand-black">Visual Verification Accuracy</h4>
+                    <div class="p-4 bg-gray-50 border border-gray-100 rounded-xl flex justify-between items-center">
+                        <div>
+                            <div class="text-[9px] text-gray-400 font-bold uppercase">Precision Rate</div>
+                            <div class="text-lg font-bold text-brand-black mt-1">99.98%</div>
+                        </div>
+                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">MAX OPTIMAL</span>
+                    </div>
+                    <!-- Accuracy table -->
+                    <div class="border border-gray-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <tr class="bg-gray-50 border-b border-gray-100 text-gray-400 font-bold uppercase">
+                                <th class="p-2.5">Category</th>
+                                <th class="p-2.5">Verified</th>
+                                <th class="p-2.5">Rate</th>
+                            </tr>
+                            <tr class="border-b border-gray-50">
+                                <td class="p-2.5 font-semibold">Visual Layouts</td>
+                                <td class="p-2.5 font-semibold text-brand-blue">Pass</td>
+                                <td class="p-2.5 text-gray-500">100%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold">Data Streams</td>
+                                <td class="p-2.5 font-semibold text-brand-blue">Pass</td>
+                                <td class="p-2.5 text-gray-500">99.98%</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COLOR GUIDE & TYPOGRAPHY SYSTEM STYLE GUIDE -->
+    <section class="py-24 px-8 md:px-16 bg-gray-50 border-y border-gray-100" id="style-guide">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-4">
+                <span class="blue-highlight font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Style System</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-black tracking-tight">
+                    System Typography & Color Guide
+                </h2>
+            </div>
+
+            <!-- Color Palette Blocks -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+                <!-- Color 1 -->
+                <div class="bg-white border border-gray-150 rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-32 bg-brand-blue"></div>
+                    <div class="p-6 space-y-2">
+                        <div class="font-display font-bold text-base">Electric Blue</div>
+                        <div class="text-xs text-gray-400 font-mono font-semibold">#2563eb</div>
+                        <div class="text-xs text-gray-500 font-medium">Primary action color, interactive elements.</div>
+                    </div>
+                </div>
+
+                <!-- Color 2 -->
+                <div class="bg-white border border-gray-150 rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-32 bg-accent"></div>
+                    <div class="p-6 space-y-2">
+                        <div class="font-display font-bold text-base">Vibrant Orange</div>
+                        <div class="text-xs text-gray-400 font-mono font-semibold">#f97316</div>
+                        <div class="text-xs text-gray-500 font-medium">Secondary highlights, caution warnings.</div>
+                    </div>
+                </div>
+
+                <!-- Color 3 -->
+                <div class="bg-white border border-gray-150 rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-32 bg-brand-teal"></div>
+                    <div class="p-6 space-y-2">
+                        <div class="font-display font-bold text-base">Clean Teal</div>
+                        <div class="text-xs text-gray-400 font-mono font-semibold">#14b8a6</div>
+                        <div class="text-xs text-gray-500 font-medium">Success metrics, optimal loop states.</div>
+                    </div>
+                </div>
+
+                <!-- Color 4 -->
+                <div class="bg-white border border-gray-150 rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="h-32 bg-brand-black"></div>
+                    <div class="p-6 space-y-2">
+                        <div class="font-display font-bold text-base">Pitch Black</div>
+                        <div class="text-xs text-gray-400 font-mono font-semibold">#0A0A0A</div>
+                        <div class="text-xs text-gray-500 font-medium">Core display typography, dark modes.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography scales -->
+            <div class="bg-white border border-gray-200 rounded-[32px] p-8 md:p-10 space-y-8 shadow-sm">
+                <div class="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] border-b border-gray-100 pb-4">Type Scale Matrix</div>
+                <div class="space-y-6">
+                    <div class="grid sm:grid-cols-4 gap-4 items-center">
+                        <span class="text-xs text-gray-400 font-mono">Display H1 / Gallery Bold</span>
+                        <span class="sm:col-span-3 font-display font-extrabold text-3xl md:text-4xl text-brand-black">Verification Portal</span>
+                    </div>
+                    <div class="grid sm:grid-cols-4 gap-4 items-center border-t border-gray-50 pt-6">
+                        <span class="text-xs text-gray-400 font-mono">Heading H2 / Manrope Bold</span>
+                        <span class="sm:col-span-3 font-outfit font-bold text-2xl text-brand-black">Real-Time Operational Loop</span>
+                    </div>
+                    <div class="grid sm:grid-cols-4 gap-4 items-center border-t border-gray-50 pt-6">
+                        <span class="text-xs text-gray-400 font-mono">Body / Manrope Medium</span>
+                        <span class="sm:col-span-3 font-body text-base text-gray-600 leading-relaxed">Standardizing visual component parameters across enterprise channels.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+ 
+    <!-- BRAND FONTS & LOGO GRID VARIATIONS -->
+    <section class="py-24 px-8 md:px-16 bg-white" id="brand-identity">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-4">
+                <span class="blue-highlight font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Brand Identity</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-black tracking-tight">
+                    Logo Ideas and Layouts
+                </h2>
+            </div>
+ 
+            <div class="grid lg:grid-cols-3 gap-12 items-start">
+                <!-- Column 1: Fonts showcase -->
+                <div class="bg-gray-50 border border-gray-200 rounded-[32px] p-8 space-y-6">
+                    <h3 class="font-display text-xl font-bold text-brand-black">Font Families</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-white rounded-xl border border-gray-150 font-display font-bold text-lg">Gallery Bold / Display</div>
+                        <div class="p-4 bg-white rounded-xl border border-gray-150 font-outfit font-semibold text-lg">Manrope Semibold</div>
+                        <div class="p-4 bg-white rounded-xl border border-gray-150 font-body text-base">Manrope Regular / Body</div>
+                        <div class="p-4 bg-white rounded-xl border border-gray-150 font-manrope font-semibold text-base">Manrope Semibold</div>
+                    </div>
+                </div>
+
+                <!-- Column 2 & 3: Logo Variations Grid -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <!-- Variant 1 -->
+                        <div class="aspect-square bg-gray-50 border border-gray-200 rounded-3xl flex flex-col items-center justify-center space-y-2 hover:border-brand-blue/30 transition-colors">
+                            <span class="font-display font-black text-2xl text-brand-blue">Q</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase">Logo Variant A</span>
+                        </div>
+                        <!-- Variant 2 -->
+                        <div class="aspect-square bg-gray-50 border border-gray-200 rounded-3xl flex flex-col items-center justify-center space-y-2 hover:border-brand-blue/30 transition-colors">
+                            <span class="font-display font-black text-2xl text-brand-black">QA</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase">Logo Variant B</span>
+                        </div>
+                        <!-- Variant 3 -->
+                        <div class="aspect-square bg-gray-50 border border-gray-200 rounded-3xl flex flex-col items-center justify-center space-y-2 hover:border-brand-blue/30 transition-colors">
+                            <span class="font-display font-black text-2xl text-accent">AI</span>
+                            <span class="text-[9px] text-gray-400 font-bold uppercase">Logo Variant C</span>
+                        </div>
+                        <!-- Variant 4 -->
+                        <div class="aspect-square bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col items-center justify-center space-y-2 hover:border-brand-blue/30 transition-colors">
+                            <span class="font-display font-black text-2xl text-white">Q/A</span>
+                            <span class="text-[9px] text-zinc-500 font-bold uppercase">Logo Variant D</span>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Brand Layouts -->
+                    <div class="p-8 bg-gray-50 border border-gray-150 rounded-[32px] space-y-6">
+                        <h4 class="font-outfit text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Integrated Brand Layouts</h4>
+                        <div class="flex flex-wrap gap-6 items-center justify-around">
+                            <!-- Layout 1 -->
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded bg-brand-blue flex items-center justify-center font-display font-extrabold text-white text-base">Q</span>
+                                <span class="font-display font-extrabold text-lg tracking-tight text-brand-black">QA/AI</span>
+                            </div>
+                            <!-- Layout 2 -->
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded bg-brand-blueDark flex items-center justify-center font-display font-extrabold text-white text-base">Q</span>
+                                <span class="font-display font-extrabold text-lg tracking-tight text-brand-blueDark">QA/AI</span>
+                            </div>
+                            <!-- Layout 3 -->
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded bg-zinc-950 flex items-center justify-center font-display font-extrabold text-white text-base">Q</span>
+                                <span class="font-display font-extrabold text-lg tracking-tight text-brand-black">QA/AI</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UI BADGES & TOKENS -->
+    <section class="py-24 px-8 md:px-16 bg-gray-50 border-y border-gray-100" id="ui-badges">
+        <div class="max-w-7xl mx-auto space-y-12">
+            <!-- Header -->
+            <div class="space-y-4">
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-brand-black tracking-tight">
+                    UI Badge Tokens
+                </h2>
+                <p class="text-gray-500 text-lg md:text-xl font-body leading-relaxed max-w-3xl">
+                    Badges designed to convey system statuses dynamically and clearly, using predefined state tokens.
+                </p>
+            </div>
+
+            <!-- Badges Flex Grid -->
+            <div class="bg-white border border-gray-200 rounded-[32px] p-8 md:p-10 flex flex-wrap gap-4 items-center justify-around shadow-sm">
+                <!-- Badge 1 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="px-4 py-1 rounded bg-green-50 border border-green-200 text-xs font-bold text-green-700 uppercase tracking-wider">Active State</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">Optimal Operation</span>
+                </div>
+                <!-- Badge 2 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="px-4 py-1 rounded bg-amber-50 border border-amber-200 text-xs font-bold text-amber-700 uppercase tracking-wider">In Review</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">Verification needed</span>
+                </div>
+                <!-- Badge 3 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="px-4 py-1 rounded bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 uppercase tracking-wider">Alert State</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">SLA Breach Warning</span>
+                </div>
+                <!-- Badge 4 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="px-4 py-1 rounded bg-purple-50 border border-purple-200 text-xs font-bold text-brand-blue uppercase tracking-wider">Optimal State</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">Highest performance</span>
+                </div>
+                <!-- Badge 5 -->
+                <div class="flex flex-col items-center gap-2">
+                    <span class="px-4 py-1 rounded bg-gray-100 border border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">Archive</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">Vetted logs saved</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WIREFRAMES & SYSTEM BLUEPRINTS -->
+    <section class="py-24 px-8 md:px-16 bg-white" id="blueprints">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-4">
+                <span class="blue-highlight font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Structure Schemas</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-black tracking-tight">
+                    System Wireframe & Blueprints
+                </h2>
+            </div>
+
+            <!-- Wireframes Grid Layout -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Blueprint Card 1 -->
+                <div class="bg-white border-2 border-dashed border-gray-200 rounded-[32px] p-8 space-y-6 hover:border-brand-blue/30 transition-colors">
+                    <div class="text-xs text-gray-400 font-bold uppercase">Blueprint A / Dashboard Main Grid</div>
+                    <div class="h-40 bg-gray-50 border border-gray-150 rounded-2xl flex flex-col justify-around p-4">
+                        <div class="h-6 w-1/3 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-5/6 bg-gray-150 rounded"></div>
+                        <div class="h-8 w-full bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+
+                <!-- Blueprint Card 2 -->
+                <div class="bg-white border-2 border-dashed border-gray-200 rounded-[32px] p-8 space-y-6 hover:border-brand-blue/30 transition-colors">
+                    <div class="text-xs text-gray-400 font-bold uppercase">Blueprint B / Pipeline Analytics</div>
+                    <div class="h-40 bg-gray-50 border border-gray-150 rounded-2xl flex flex-col justify-around p-4">
+                        <div class="h-6 w-1/2 bg-gray-200 rounded"></div>
+                        <div class="h-12 w-full border border-gray-200 border-dashed rounded flex items-center justify-center text-[10px] text-gray-400">GRAPH LAYOUT</div>
+                        <div class="h-4 w-1/4 bg-gray-250 rounded"></div>
+                    </div>
+                </div>
+
+                <!-- Blueprint Card 3 -->
+                <div class="bg-zinc-950 border-2 border-dashed border-zinc-800 rounded-[32px] p-8 space-y-6 hover:border-brand-blue/30 transition-colors">
+                    <div class="text-xs text-zinc-500 font-bold uppercase">Blueprint C / Dark System Status</div>
+                    <div class="h-40 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col justify-around p-4">
+                        <div class="h-6 w-1/3 bg-zinc-800 rounded"></div>
+                        <div class="h-4 w-2/3 bg-zinc-800 rounded"></div>
+                        <div class="h-8 w-full bg-zinc-850 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HIGH-FIDELITY DASHBOARD SYSTEM INTERFACES -->
+    <section class="py-24 px-8 md:px-16 bg-gray-50 border-y border-gray-100" id="hifi-system">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <!-- Header -->
+            <div class="space-y-4">
+                <span class="blue-highlight font-display text-xs font-bold text-brand-blue uppercase tracking-[0.3em]">Hifi System Interfaces</span>
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-brand-black tracking-tight">
+                    Highly Vetted Hifi System Interfaces
+                </h2>
+            </div>
+
+            <!-- Visual Layout Grid -->
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Interface Card 1 -->
+                <div class="bg-white border border-gray-150 rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+                        <span class="text-xs font-bold text-brand-blue uppercase tracking-wider">Client Health Vetting</span>
+                        <span class="px-2 py-0.5 rounded bg-blue-100 text-[10px] font-bold text-brand-blue">Active Live</span>
+                    </div>
+                    <!-- Screen mockup -->
+                    <div class="bg-gray-50 rounded-2xl p-5 space-y-4">
+                        <div class="p-4 bg-white rounded-xl border border-gray-150">
+                            <div class="text-[9px] text-gray-400 font-bold uppercase">Overall SLA Adherence</div>
+                            <div class="text-2xl font-bold text-brand-black mt-1">98.4%</div>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl border border-gray-150">
+                            <div class="text-[9px] text-gray-400 font-bold uppercase">Vetted Outputs</div>
+                            <div class="text-2xl font-bold text-brand-blue mt-1">100%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interface Card 2 -->
+                <div class="bg-white border border-gray-150 rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+                        <span class="text-xs font-bold text-brand-blue uppercase tracking-wider">Operational Pipeline metrics</span>
+                        <span class="px-2 py-0.5 rounded bg-teal-100 text-[10px] font-bold text-teal-700">OPTIMAL</span>
+                    </div>
+                    <!-- Screen mockup -->
+                    <div class="bg-gray-50 rounded-2xl p-4 overflow-hidden">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-white border-b border-gray-150 text-gray-400 font-bold uppercase">
+                                    <th class="p-2.5">Category</th>
+                                    <th class="p-2.5">Loop</th>
+                                    <th class="p-2.5">Speed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100 bg-white">
+                                    <td class="p-2.5 font-semibold">CRM Database</td>
+                                    <td class="p-2.5 font-semibold text-brand-blue">Pass</td>
+                                    <td class="p-2.5 text-gray-500">12ms</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="p-2.5 font-semibold">Visual Assets</td>
+                                    <td class="p-2.5 font-semibold text-brand-blue">Pass</td>
+                                    <td class="p-2.5 text-gray-500">18ms</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STRATEGIC DESIGN DECISIONS / 3D PHONE MOCKUPS -->
+    <section class="py-24 px-8 md:px-16 bg-white" id="design-decisions">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="font-display text-4xl md:text-5xl font-bold text-brand-black tracking-tight text-center mb-20">
+                Strategic Design Decisions: Architecting a High-Performance QA Ecosystem
+            </h2>
+
+            <div class="grid lg:grid-cols-12 gap-16 items-center">
+                <!-- Column 1: Vertical Phone Mockup 1 (Client health scroll) -->
+                <div class="lg:col-span-4 flex justify-center perspective-1000">
+                    <div class="phone-tilt-card w-[290px] bg-zinc-950 p-3.5 pb-6 rounded-[48px] shadow-2xl border-4 border-zinc-800 transform rotate-y-12 transition-transform duration-500">
+                        <div class="w-20 h-4 bg-zinc-800 mx-auto rounded-full mb-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-zinc-900"></div>
+                        </div>
+                        <!-- Internal screen -->
+                        <div class="bg-white rounded-[32px] overflow-hidden p-4 aspect-[9/19] flex flex-col justify-between select-none">
+                            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                                <span class="text-[10px] font-extrabold text-brand-black uppercase">QA/AI Mobile</span>
+                                <div class="w-3 h-3 rounded-full bg-brand-blue"></div>
+                            </div>
+                            <!-- Client list high density -->
+                            <div class="flex-1 space-y-2 py-3 overflow-y-auto">
+                                <div class="p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1.5">
+                                    <div class="flex justify-between text-[9px] font-bold">
+                                        <span class="text-gray-700">Database Loop</span>
+                                        <span class="text-emerald-600">Verified</span>
+                                    </div>
+                                    <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="w-[100%] h-full bg-emerald-500"></div>
+                                    </div>
+                                </div>
+                                <div class="p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1.5">
+                                    <div class="flex justify-between text-[9px] font-bold">
+                                        <span class="text-gray-700">UI Graphics</span>
+                                        <span class="text-emerald-600">Verified</span>
+                                    </div>
+                                    <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="w-[98%] h-full bg-emerald-500"></div>
+                                    </div>
+                                </div>
+                                <div class="p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1.5">
+                                    <div class="flex justify-between text-[9px] font-bold">
+                                        <span class="text-gray-700">SLA Audit</span>
+                                        <span class="text-amber-500">In Review</span>
+                                    </div>
+                                    <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="w-[78%] h-full bg-amber-500"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center text-[8px] text-gray-400 font-bold uppercase pt-2 border-t border-gray-100">
+                                Swipe up to reload
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Design Decisions Text Blocks & Second phone -->
+                <div class="lg:col-span-8 grid md:grid-cols-2 gap-12">
+                    <!-- Top text block -->
+                    <div class="space-y-6 md:col-span-2">
+                        <div class="space-y-3">
+                            <h3 class="font-display text-2xl font-bold text-brand-black">Density & Performance</h3>
+                            <p class="text-gray-600 text-base leading-relaxed">
+                                Empowered by a high density visual grid which manages complex data loads without introducing screen lag.
+                            </p>
+                        </div>
+                        <div class="space-y-3">
+                            <h3 class="font-display text-2xl font-bold text-brand-black">Executive Analytics</h3>
+                            <p class="text-gray-600 text-base leading-relaxed">
+                                Designed a comprehensive analytics dashboard that integrates data from active repositories.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Left bottom text block -->
+                    <div class="space-y-3 pt-6">
+                        <h3 class="font-display text-2xl font-bold text-brand-black">SLA Audit Metrics</h3>
+                        <p class="text-gray-600 text-base leading-relaxed">
+                            A completely integrated tracking framework which manages metrics and loops instantly across target servers.
+                        </p>
+                    </div>
+
+                    <!-- Right bottom phone mockup (Donut analytics) -->
+                    <div class="flex justify-center perspective-1000">
+                        <div class="phone-tilt-card w-[260px] bg-zinc-950 p-3.5 pb-6 rounded-[48px] shadow-2xl border-4 border-zinc-800 transform -rotate-y-12 transition-transform duration-500">
+                            <div class="w-16 h-4 bg-zinc-800 mx-auto rounded-full mb-3 flex items-center justify-center">
+                                <div class="w-2.5 h-2.5 rounded-full bg-zinc-900"></div>
+                            </div>
+                            <!-- Internal screen -->
+                            <div class="bg-white rounded-[32px] overflow-hidden p-4 aspect-[9/19] flex flex-col justify-between select-none">
+                                <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                                    <span class="text-[9px] font-extrabold text-gray-400 uppercase">SLA Compliance</span>
+                                    <span class="text-[9px] text-brand-blue font-bold">98.4%</span>
+                                </div>
+                                <!-- Donut SVG display -->
+                                <div class="flex-1 flex flex-col items-center justify-center space-y-3">
+                                    <div class="relative w-28 h-28 flex items-center justify-center">
+                                        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#dbeafe" stroke-width="3.5"></circle>
+                                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-dasharray="98.4 1.6"></circle>
+                                        </svg>
+                                        <div class="absolute text-center">
+                                            <div class="text-xs font-bold text-gray-400 uppercase">SLA</div>
+                                            <div class="text-lg font-display font-extrabold text-brand-blue mt-0.5">98%</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-[9px] text-center text-gray-500 font-medium">Optimal operational zone</div>
+                                </div>
+                                <div class="text-center text-[8px] text-gray-400 font-bold uppercase pt-2 border-t border-gray-100">
+                                    Live SLA Monitor
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECT IMPACT SECTION -->
+    <section class="py-24 px-8 md:px-16 bg-white" id="impact">
+        <div class="max-w-7xl mx-auto">
+            <!-- Section Title -->
+            <div class="mb-16">
+                <span class="blue-highlight font-display text-4xl md:text-5xl font-bold text-brand-black tracking-tight leading-[1.25]">
+                    Project Impact & Outcomes
+                </span>
+            </div>
+
+            <!-- 4 Stats horizontal layout -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Stat 1 -->
+                <div class="p-8 bg-gray-50 border border-gray-150 rounded-[32px] shadow-sm hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                    <div class="text-brand-blue font-display text-4xl font-extrabold mb-6">70%</div>
+                    <div class="space-y-2">
+                        <h4 class="font-outfit font-bold text-base text-brand-black">Reduction in QA Loop Duration</h4>
+                        <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                            Automating manual audits and visual checks led to an immediate reduction in test times.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="p-8 bg-gray-50 border border-gray-150 rounded-[32px] shadow-sm hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                    <div class="text-brand-blue font-display text-4xl font-extrabold mb-6">100%</div>
+                    <div class="space-y-2">
+                        <h4 class="font-outfit font-bold text-base text-brand-black">Real-Time Transparency</h4>
+                        <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                            Introduced immediate status tracking, providing total transparency for operational stakeholders.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="p-8 bg-gray-50 border border-gray-150 rounded-[32px] shadow-sm hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                    <div class="text-brand-blue font-display text-4xl font-extrabold mb-6">30%</div>
+                    <div class="space-y-2">
+                        <h4 class="font-outfit font-bold text-base text-brand-black">Higher SLA Compliance</h4>
+                        <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                            Automated tracking alert parameters led to a massive boost in SLA compliance metrics.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="p-8 bg-gray-50 border border-gray-150 rounded-[32px] shadow-sm hover:-translate-y-2 transition-transform duration-300 flex flex-col justify-between">
+                    <div class="text-brand-blue font-display text-4xl font-extrabold mb-6">15+ Hrs</div>
+                    <div class="space-y-2">
+                        <h4 class="font-outfit font-bold text-base text-brand-black">Saved Weekly</h4>
+                        <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                            Eliminated repetitive inspection tasks, freeing up QA specialists for strategic activities.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOTTOM COVER / FOOTER BLOCK -->
+    <section class="py-24 px-8 bg-gray-50 border-t border-gray-100 overflow-hidden relative">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center relative z-10">
+            <!-- MacBook Display Image -->
+            <div class="lg:col-span-7 rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
+                <img src="./images/qa_footer.png" alt="QA/AI application on MacBook footer" class="w-full h-auto object-cover">
+            </div>
+
+            <!-- Vibrant Gradient Overlapping Card -->
+            <div class="lg:col-span-5 bg-gradient-to-tr from-brand-blueDark to-brand-blue text-white p-10 md:p-12 rounded-[40px] shadow-2xl relative lg:-ml-16 border border-brand-blue flex flex-col justify-between hover:scale-[1.01] transition-transform duration-300 select-none">
+                <div class="space-y-6">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-display text-xl font-bold">
+                        ✦
+                    </div>
+                    <p class="font-display text-xl md:text-2xl font-bold leading-relaxed text-blue-500Light">
+                        "QA/AI automated critical quality assurance pipelines, successfully reducing visual inspection workloads by 70% and achieving 100% verification accuracy across all client platforms."
+                    </p>
+                </div>
+                <div class="pt-10 border-t border-white/15 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-blue-200">
+                    <span>Avinash Kumar</span>
+                    <span>Lead QA Designer</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-black py-20 px-8 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)]"></div>
+        <div class="max-w-4xl mx-auto relative z-10">
+            <h2 class="font-display text-4xl md:text-6xl font-bold text-white tracking-tighter mb-12">Let's create something <br> remarkable together.</h2>
+            <button class="cta-btn text-lg px-12 py-5 bg-brand-blue hover:bg-brand-blueDark text-white font-semibold rounded-full shadow-lg transition-all duration-300 hover:scale-105">Get in Touch</button>
+            <div class="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <span class="text-white/20 text-xs uppercase tracking-[0.5em]">Portfolio 2024</span>
+                <div class="flex gap-8 text-white/40 text-sm font-bold uppercase tracking-widest">
+                    <a href="#" class="hover:text-brand-blue transition-colors">LinkedIn</a>
+                    <a href="#" class="hover:text-brand-blue transition-colors">Dribbble</a>
+                    <a href="#" class="hover:text-brand-blue transition-colors">Twitter</a>
+                </div>
+                <span class="text-white/20 text-xs">Based in Delhi, India</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripting -->
+    <script>
+        // Initialize Lenis Smooth Scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // GSAP ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor Follower
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+        const cursorText = follower.querySelector('.cursor-text');
+
+        let mouseX = 0, mouseY = 0, followerX = 0, followerY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            gsap.to(cursor, { x: mouseX, y: mouseY, duration: 0.05 });
+        });
+
+        function updateFollower() {
+            followerX += (mouseX - followerX) * 0.15;
+            followerY += (mouseY - followerY) * 0.15;
+            gsap.set(follower, { x: followerX - 20, y: followerY - 20 });
+            requestAnimationFrame(updateFollower);
+        }
+        updateFollower();
+
+        // Cursor interactions
+        document.querySelectorAll('a, button, table, .phone-tilt-card, .glass-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursor, { scale: 3, opacity: 0.3 });
+                gsap.to(follower, { scale: 1.3, borderColor: '#2563eb' });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursor, { scale: 1, opacity: 1 });
+                gsap.to(follower, { scale: 1, borderColor: 'rgba(37, 99, 235, 0.5)' });
+            });
+        });
+
+        // Magnet Buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                gsap.to(btn, {
+                    x: (e.clientX - rect.left - rect.width / 2) * 0.3,
+                    y: (e.clientY - rect.top - rect.height / 2) * 0.3,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // Section & Element Reveals
+        document.querySelectorAll('section').forEach(section => {
+            gsap.from(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                y: 40,
+                opacity: 0,
+                duration: 1.2,
+                ease: "power3.out"
+            });
+        });
+
+        // 3D Phone Tilt Tracking
+        document.querySelectorAll('.phone-tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+                const rotateX = -(y - yc) / 8;
+                const rotateY = (x - xc) / 8;
+                gsap.to(card, {
+                    rotateX: rotateX,
+                    rotateY: rotateY,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    rotateX: 0,
+                    rotateY: 0,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.3)"
+                });
+            });
+        });
+
+        console.log("QA/AI engine loaded.");
+    </script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Writing</title>
+    <meta name="description" content="">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Smooth Scroll & Animations -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        gallery: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        manrope: ['Manrope', 'sans-serif'],
+                        display: ['Gallery', 'Gallery Modern', 'Playfair Display', 'serif'],
+                        body: ['Manrope', 'sans-serif'],
+                        outfit: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#0A0A0A',
+                            blue: '#2563eb',
+                        },
+                        accent: '#f97316',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #FFFFFF;
+            color: #111;
+            overflow-x: hidden;
+        }
+
+        .font-gallery {
+            font-family: 'Gallery', 'Gallery Modern', 'Playfair Display', serif;
+        }
+
+        .font-manrope {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        html.lenis {
+            height: auto;
+        }
+
+        /* Nav - old .about-nav styles removed, using inline styles on new nav */
+
+        /* Custom Cursor */
+        #cursor {
+            width: 8px;
+            height: 8px;
+            background: #2563eb;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        #cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(37, 99, 235, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Sections */
+        .about-section {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+
+
+        /* Decorative colored figures */
+        .color-figures {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-fig {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .color-fig.square {
+            border-radius: 4px;
+        }
+
+        .color-fig.triangle {
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-bottom: 28px solid currentColor;
+            border-radius: 0;
+            background: none !important;
+        }
+
+        /* Wavy line divider */
+        .wavy-divider {
+            width: 100%;
+            height: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wavy-divider svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Mentor card */
+        .mentor-card {
+            background: #FAFAFA;
+            border: 1px solid #eee;
+            border-radius: 24px;
+            padding: 40px;
+        }
+
+        /* Bottom image section */
+        .bottom-collage {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .bottom-collage img {
+            width: 100%;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+
+        /* Reveal animations */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        /* Highlight link style */
+        .text-link {
+            color: #2563eb;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .text-link:hover {
+            color: #1d4ed8;
+        }
+
+        /* Bold highlight */
+        .highlight {
+            font-weight: 600;
+            color: #0A0A0A;
+        }
+
+        /* Section heading style */
+        .section-heading {
+            font-family: 'Gallery', 'Gallery Modern', 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 32px;
+            color: #0A0A0A;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        @media (min-width: 768px) {
+            .section-heading {
+                font-size: 40px;
+            }
+        }
+
+        /* Body text */
+        .body-text {
+            font-size: 17px;
+            line-height: 1.75;
+            color: #444;
+        }
+
+        @media (min-width: 768px) {
+            .body-text {
+                font-size: 18px;
+            }
+        }
+
+        /* Chip tags */
+        .about-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Responsive Overrides */
+        @media (max-width: 768px) {
+            .text-\[75px\] {
+                font-size: 36px !important;
+                line-height: 1.25 !important;
+            }
+            .text-\[64px\] {
+                font-size: 30px !important;
+                line-height: 1.25 !important;
+            }
+            .text-\[32px\] {
+                font-size: 18px !important;
+                line-height: 28px !important;
+            }
+            .text-\[24px\] {
+                font-size: 20px !important;
+                line-height: 28px !important;
+            }
+            [style*="line-height: 56px"] {
+                line-height: 28px !important;
+            }
+            .about-section {
+                padding: 20px !important;
+                max-width: 100% !important;
+            }
+            /* Flex layouts wrap on mobile */
+            .flex.items-center.justify-between {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 24px !important;
+            }
+            .w-\[40\%\], .w-\[60\%\] {
+                width: 100% !important;
+            }
+            /* Stacking side-by-side images */
+            .gap-\[32px\] {
+                flex-direction: column !important;
+                gap: 20px !important;
+            }
+            /* Safe Image Scaling */
+            .about-section img {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            /* Preserve marquee carousel image dimensions */
+            .animate-marquee img,
+            .animate-marquee-reverse img,
+            .animate-marquee-3 img {
+                max-width: none !important;
+            }
+            /* Hidden br tags on mobile to let text flow naturally */
+            br {
+                display: none !important;
+            }
+            /* Nav bar adjustments */
+            #about-nav {
+                margin: 5px !important;
+                padding: 8px 12px !important;
+                width: calc(100% - 10px) !important;
+                border-radius: 12px !important;
+            }
+            #about-nav .w-full {
+                flex-direction: column !important;
+                gap: 12px !important;
+                align-items: center !important;
+            }
+            #about-nav a[href="index.html"] {
+                padding-left: 0 !important;
+            }
+            #about-nav .absolute {
+                position: relative !important;
+                left: auto !important;
+                transform: none !important;
+                margin-top: 4px !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="selection:bg-blue-600 selection:text-white">
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- NAV -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-xl shadow-black/5 flex items-center border border-gray-100"
+        id="about-nav" style="margin: 10px; padding: 15px; border-radius: 20px; width: calc(100% - 20px);">
+        <div class="w-full flex items-center justify-between relative">
+            <a href="index.html"
+                style="text-decoration: none; display: flex; align-items: center; padding-left: 110px;"><img
+                    src="./images/logo.png" alt="AB Logo" style="height: 32px; width: auto;"></a>
+            <div
+                class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 bg-[#2757D9] px-4 py-2 rounded-[50px]">
+                <a href="index.html"
+                    style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">Home</a>
+                <a href="graphics.html"
+                    style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">Graphics</a>
+                <a href="about.html"
+                    style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">About</a>
+                <a href="ai-writing.html"
+                    style="font-family: 'Manrope', sans-serif; color: white; text-decoration: none; font-size: 14px; font-weight: 500;">AI
+                    Writing</a>
+            </div>
+            <div class="w-8 h-8 opacity-0 pointer-events-none"></div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO / INTRO ========== -->
+    <section class="pt-32 md:pt-40 pb-16 max-w-8xl mx-auto" id="about-hero">
+        <div class="about-section bg-[#EAFFEB]">
+            <!-- Name -->
+            <h1 class="text-[64px] text-[#2A2A2A] font-gallery">
+                AI-Native Product Design: Grounding<br>
+                Generative Tools in UX Principles for<br>
+                Kidzento
+            </h1>
+            <div class="mt-[40px]">
+                <h3 class="text-[32px] text-[#3F3F3F] font-semibold">AI Project Overview:</h3>
+            </div>
+            <!-- Intro paragraph -->
+            <div class="body-text mt-[24px]">
+                <p class="text-[32px] text-[#3F3F3F]" style="line-height: 56px;">
+                    A comprehensive UX/UI showcase of how a high-stakes tracking<br>
+                    ecosystem <b>Multi-Tenant SaaS + Mobile App + Landing Page</b> was built <br>
+                    end-to-end. This project highlights a shift from traditional workflows to an<br>
+                    AI-native engineering sprint—utilizing Google Gemini for deep market<br>
+                    research and Figma Make for generative component design, driven by<br>
+                    <b>300+ precise prompt iterations.</b>
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+    <section>
+        <div class="about-section">
+            <div>
+                <img src="./images/admin1.png" alt="">
+            </div>
+            <div class="flex items-center gap-[32px] mt-[32px]">
+                <img src="./images/admin2.png" alt="">
+                <img src="./images/admin3.png" alt="">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ========== AI NATIVE & LOGIC FIRST ========== -->
+    <section class="py-16" id="ai-native">
+        <div class="about-section bg-[#FFF6EA] p-10 rounded-[20px]">
+            <h2 class="font-gallery text-[#2A2A2A] text-[75px]">AI-Native Workflow: Deep <br>
+                Research to Generative UI</h2>
+            <div class="mt-[40px]">
+                <h3 class="text-[32px] text-[#3F3F3F] font-semibold">AI-Powered Strategy & Logic Validation</h3>
+            </div>
+            <div class="mt-[32px]">
+                <p class="text-[32px] font-manrope text-[#3F3F3F]">
+                    Instead of relying on generic market assumptions, Google Gemini was <br>
+                    deployed as a core strategic research partner.</p>
+                <ul class="mt-[32px] text-[32px] font-manrope text-[#3F3F3F] space-y-1 pl-2">
+                    <li><b>1. Competitive Intelligence:</b> Gemini reverse-engineered existing market players, instantly
+                        isolating critical product gaps and user frustrations like legacy app battery drain.</li>
+                    <li><b>2. Stress-Testing Edge Cases:</b> Through rigorous prompt engineering, the AI acted as a
+                        logic validator to map out complex user flows such as defining instant UI behavioral shifts for
+                        Gatekeepers during unapproved early student departures.</li>
+                    <li><b>3. The 300+ Prompt Iteration Sprint:</b> First-draft generative UI lacks enterprise
+                        hierarchy. To bridge the gap, the AI was driven through 300+ precise, contextual prompt
+                        modifications.</li>
+                </ul>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== WAVY DIVIDER ========== -->
+    <!-- <div class="about-section">
+        <div class="wavy-divider">
+            <svg viewBox="0 0 800 60" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 30 Q100 0, 200 30 T400 30 T600 30 T800 30" stroke="#d1d5db" stroke-width="1.5" fill="none"/>
+            </svg>
+        </div>
+    </div> -->
+
+    <!-- ========== WHEN THE SCREENS TURN OFF ========== -->
+    <section id="screens-off">
+        <div class="about-section bg-[#F0F9FF]">
+            <h2 class="font-gallery text-[75px] text-[#2A2A2A]">The Generative UI & Iteration<br>
+                Framework (Figma Make)</h2>
+
+            <div class="mt-[32px]">
+                <p class="text-[32px] font-manrope text-[#3F3F3F]">
+                    Moving from strategy to canvas required rapid execution without <br>
+                    compromising data hierarchy. <b>Figma Make</b> was deployed to generate initial <br>
+                    component layouts, dramatically scaling up structural exploration.
+                </p>
+                <p class="text-[32px] font-manrope text-[#3F3F3F] mt-10">
+                    <b>Over 300+ contextual prompt modifications</b> were executed to refine data <br>
+                    grids, optimize live-tracking status cards, and establish consistent UI <br>
+                    states.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== WAVY DIVIDER ========== -->
+    <!-- <div class="about-section">
+        <div class="wavy-divider">
+            <svg viewBox="0 0 800 60" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 30 Q100 60, 200 30 T400 30 T600 30 T800 30" stroke="#d1d5db" stroke-width="1.5" fill="none"/>
+            </svg>
+        </div>
+    </div> -->
+
+    <section class="py-[100px]">
+        <div class="about-section">
+            <div>
+                <img src="./images/portal.png" alt="">
+            </div>
+
+        </div>
+    </section>
+
+  <section class="py-16" id="ai-native">
+        <div class="about-section bg-[#FFEAF5] p-10 rounded-[20px]">
+            <h2 class="font-gallery text-[#2A2A2A] text-[75px]">The Ultimate Takeaway: AI is a <br>Multiplier, Not a Substitute</h2>
+            <div class="mt-[40px]">
+                <h3 class="text-[32px] text-[#3F3F3F] font-semibold">The defining lesson from building Kidzento is clear: AI can radically<br>
+                     accelerate execution velocity, but it cannot replace foundational design<br>
+                      expertise.</h3>
+            </div>
+            <div class="mt-[32px]">
+                <p class="text-[32px] font-manrope text-[#3F3F3F]">
+                    To successfully direct tools like <b></b>Gemini, Figma Make, or Claude MCP</b><br>
+                     toward production ready standards, a designer must possess a deep,<br>
+                      intuitive mastery of</p>
+                <ul class="mt-[32px] text-[32px] font-manrope text-[#3F3F3F] space-y-2 pl-2">
+                    <li><b>1. Core Design Fundamentals:</b> 
+                        Understanding UX Research Method, UX principles, Ux<br>
+                        Fundamentals, UI Principles, typography scale, spatial <br>
+                        grids, contrast, and visual hierarchy. AI provides endless variations, but<br>
+                        only <b>human expertise selects the correct layout.</b></li>
+                    <li><b>2. UX Research Methodologies</b> TKnowing how to accurately isolate real <br>
+                        <b>user pain points, synthesize competitive data</b>, and translate those <br>
+                        insights into reliable Information Architecture.</li>
+                    <li><b>3. Systems Thinking:</b> Anticipating complex edge cases and structural <br>
+                        dependencies that generative models cannot predict on their own.</li>
+                </ul>
+
+            </div>
+             <div class="mt-[40px]">
+                <h3 class="text-[32px] text-[#3F3F3F] font-semibold">The Hybrid Designer Advantage: AI can Help the Designer on this project, it <br>
+                     magnified it. By shifting the mechanical burden of initial layout generation <br>
+                     and data synthesis to AI, 100% of the focus was redirected where it matters <br>
+                     most: high-level product strategy, flawless logic, and precision user 
+                     <br>experience engineering.</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== carousel ========== -->
+    <section class="py-16 overflow-hidden bg-white">
+       
+            <div class="relative w-full overflow-hidden py-4">
+
+                <div class="flex gap-6 animate-marquee whitespace-nowrap min-w-full">
+                    <!-- Group 1 -->
+                    <div class="flex-shrink-0 flex gap-6">
+                        <img src="./images/saas1.png" alt="SaaS 1" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas2.png" alt="SaaS 2" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas3.png" alt="SaaS 3" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas4.png" alt="SaaS 4" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas5.png" alt="SaaS 5" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    </div>
+                    <!-- Group 2 (Duplicate for infinite seamless loop) -->
+                    <div class="flex-shrink-0 flex gap-6">
+                        <img src="./images/saas1.png" alt="SaaS 1 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas2.png" alt="SaaS 2 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas3.png" alt="SaaS 3 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas4.png" alt="SaaS 4 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                        <img src="./images/saas5.png" alt="SaaS 5 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    </div>
+                </div>
+            </div>
+        
+        <style>
+            @keyframes marquee {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(calc(-50% - 12px));
+                }
+            }
+
+            .animate-marquee {
+                display: flex;
+                width: max-content;
+                animation: marquee 30s linear infinite;
+            }
+
+            .animate-marquee:hover {
+                animation-play-state: paused;
+            }
+        </style>
+    </section>
+
+     <!-- ========== carousel 2 ========== -->
+    <section class="pb-16 overflow-hidden bg-white">
+        <div class="relative w-full overflow-hidden py-4">
+            
+            <div class="flex gap-6 animate-marquee-reverse whitespace-nowrap min-w-full">
+                <!-- Group 1 -->
+                <div class="flex-shrink-0 flex gap-6">
+                    <img src="./images/ma1.png" alt="Creative 1" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma2.png" alt="Creative 2" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma3.png" alt="Creative 3" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma4.png" alt="Creative 4" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma5.png" alt="Creative 5" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma6.png" alt="Creative 6" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                </div>
+                <!-- Group 2 (Duplicate for infinite seamless loop) -->
+                <div class="flex-shrink-0 flex gap-6">
+                    <img src="./images/ma1.png" alt="Creative 1 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma2.png" alt="Creative 2 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma3.png" alt="Creative 3 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma4.png" alt="Creative 4 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma5.png" alt="Creative 5 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/ma6.png" alt="Creative 6 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes marquee-reverse {
+                0% {
+                    transform: translateX(calc(-50% - 12px));
+                }
+                100% {
+                    transform: translateX(0);
+                }
+            }
+            .animate-marquee-reverse {
+                display: flex;
+                width: max-content;
+                animation: marquee-reverse 35s linear infinite;
+            }
+            .animate-marquee-reverse:hover {
+                animation-play-state: paused;
+            }
+        </style>
+    </section>
+
+     <!-- ========== carousel 3 ========== -->
+    <section class="pb-16 overflow-hidden bg-white">
+        <div class="relative w-full overflow-hidden py-4">
+            
+            <div class="flex gap-6 animate-marquee-3 whitespace-nowrap min-w-full">
+                <!-- Group 1 -->
+                <div class="flex-shrink-0 flex gap-6">
+                    <img src="./images/la1.png" alt="Creative 1" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la2.png" alt="Creative 2" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la3.png" alt="Creative 3" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la4.png" alt="Creative 4" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la5.png" alt="Creative 5" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la6.png" alt="Creative 6" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la7.png" alt="Creative 7" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la8.png" alt="Creative 8" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la9.png" alt="Creative 9" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la10.png" alt="Creative 10" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                </div>
+                <!-- Group 2 (Duplicate for infinite seamless loop) -->
+                <div class="flex-shrink-0 flex gap-6">
+                    <img src="./images/la1.png" alt="Creative 1 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la2.png" alt="Creative 2 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la3.png" alt="Creative 3 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la4.png" alt="Creative 4 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la5.png" alt="Creative 5 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la6.png" alt="Creative 6 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la7.png" alt="Creative 7 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la8.png" alt="Creative 8 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la9.png" alt="Creative 9 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                    <img src="./images/la10.png" alt="Creative 10 Duplicate" class="w-auto h-[250px] md:h-[450px] rounded-[24px] border border-gray-150/40 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes marquee-3 {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(calc(-50% - 12px));
+                }
+            }
+            .animate-marquee-3 {
+                display: flex;
+                width: max-content;
+                animation: marquee-3 32s linear infinite;
+            }
+            .animate-marquee-3:hover {
+                animation-play-state: paused;
+            }
+        </style>
+    </section>
+
+<section id="screens-off pt-[100px]">
+        <div class="about-section bg-[#F0F9FF]">
+            <h2 class="font-gallery text-[75px] text-[#2A2A2A]">Presently I am Exploring Claude <br>
+                MCP Integration</h2>
+
+            <div class="mt-[32px]">
+                <p class="text-[32px] font-manrope text-[#3F3F3F]">
+                   Scaling past basic prompting, the workflow has evolved into true system<br>
+                    automation by connecting Claude via <b>Figma MCP (Model Context<br>
+                     Protocol)</b>. This advanced setup presently allows for the generation of<br>
+                      complex design systems directly from systemic code tokens, seamlessly<br>
+                       bridging atomic design with technical execution.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+
+<section class="py-[100px]">
+    <div class="about-section">
+        <img src="/images/93.png" alt="">
+
+    </div>
+</section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="py-[60px] px-6 md:py-[100px] md:px-[84px] bg-white" id="experience">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-24 items-start">
+                <div class="">
+                    <p class="font-gallery text-[24px] md:text-[32px] text-[#3F3F3F] leading-[40px] md:leading-[56px]">
+                        So you’re looking for a designer
+                        who mixes creativity, strategy, storytelling, and modern AI thinking…
+                        You’re in the right place.</p>
+                    <button
+                        class="mt-[29px]  bg-[#FF7926] text-white py-[8px] px-[20px] rounded-[30px] flex items-center gap-[6px] font-manrope text-[16px]">
+                        Start Working
+
+                        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0_142_53)">
+                                <path
+                                    d="M17.836 15.1921L17.8413 4.20947L6.85884 4.14718C6.74446 4.13133 6.62802 4.14025 6.51739 4.17332C6.40676 4.20639 6.30453 4.26284 6.21761 4.33886C6.1307 4.41487 6.06113 4.50868 6.01362 4.61392C5.96611 4.71915 5.94177 4.83337 5.94224 4.94884C5.94271 5.0643 5.96798 5.17832 6.01634 5.28317C6.06471 5.38802 6.13503 5.48125 6.22256 5.55656C6.31009 5.63186 6.41278 5.68748 6.52368 5.71965C6.63457 5.75182 6.75108 5.75979 6.86532 5.74302L15.095 5.80254L4.15869 16.6718C4.00707 16.8224 3.92152 17.0272 3.92086 17.241C3.92021 17.4547 4.00449 17.66 4.15518 17.8116C4.30587 17.9632 4.51062 18.0488 4.72439 18.0494C4.93815 18.0501 5.14342 17.9658 5.29504 17.8151L16.2314 6.94591L16.2402 15.1758C16.2403 15.3897 16.3254 15.5948 16.4767 15.746C16.628 15.8971 16.8332 15.982 17.0471 15.9819C17.2609 15.9818 17.466 15.8967 17.6172 15.7454C17.7684 15.5941 17.8532 15.389 17.8531 15.1751L17.836 15.1921Z"
+                                    fill="white" />
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_142_53">
+                                    <rect width="22" height="22" fill="white" />
+                                </clipPath>
+                            </defs>
+                        </svg>
+
+                    </button>
+                </div>
+
+                <div class="">
+                    <div class=" group hover:pl-4 transition-all">
+                        <div class="flex gap-[16px] items-start mb-2">
+                            <div>
+
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M19.95 21C17.8667 21 15.8083 20.546 13.775 19.638C11.7417 18.73 9.89167 17.4423 8.225 15.775C6.55833 14.1077 5.271 12.2577 4.363 10.225C3.455 8.19233 3.00067 6.134 3 4.05C3 3.75 3.1 3.5 3.3 3.3C3.5 3.1 3.75 3 4.05 3H8.1C8.33333 3 8.54167 3.07933 8.725 3.238C8.90833 3.39667 9.01667 3.584 9.05 3.8L9.7 7.3C9.73333 7.56667 9.725 7.79167 9.675 7.975C9.625 8.15833 9.53333 8.31667 9.4 8.45L6.975 10.9C7.30833 11.5167 7.704 12.1123 8.162 12.687C8.62 13.2617 9.12433 13.816 9.675 14.35C10.1917 14.8667 10.7333 15.346 11.3 15.788C11.8667 16.23 12.4667 16.634 13.1 17L15.45 14.65C15.6 14.5 15.796 14.3877 16.038 14.313C16.28 14.2383 16.5173 14.2173 16.75 14.25L20.2 14.95C20.4333 15.0167 20.625 15.1377 20.775 15.313C20.925 15.4883 21 15.684 21 15.9V19.95C21 20.25 20.9 20.5 20.7 20.7C20.5 20.9 20.25 21 19.95 21Z"
+                                        fill="#3E3E3E" />
+                                </svg>
+
+                            </div>
+                            <div>
+                                <p class="font-gallery text-[#3F3F3F] text-[20px]">Call Me</p>
+                                <p class="text-manrope font-semibold text-[20px] mt-[6px]">+91 8851XXXXXX</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="pt-10 group hover:pl-4 transition-all">
+                        <div class="flex gap-[16px] items-start mb-2">
+                            <div>
+
+
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M4 20C3.45 20 2.97933 19.8043 2.588 19.413C2.19667 19.0217 2.00067 18.5507 2 18V6C2 5.45 2.196 4.97933 2.588 4.588C2.98 4.19667 3.45067 4.00067 4 4H20C20.55 4 21.021 4.196 21.413 4.588C21.805 4.98 22.0007 5.45067 22 6V18C22 18.55 21.8043 19.021 21.413 19.413C21.0217 19.805 20.5507 20.0007 20 20H4ZM12 13L20 8V6L12 11L4 6V8L12 13Z"
+                                        fill="#3E3E3E" />
+                                </svg>
+
+
+                            </div>
+                            <div>
+                                <p class="font-gallery text-[#3F3F3F] text-[20px]">Mail Me</p>
+                                <p class="text-manrope font-semibold text-[20px] mt-[6px]">
+                                    creative.avinashbhagat@gmail.com</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="pt-10 group hover:pl-4 transition-all">
+                        <div class="flex gap-[24px] items-start mb-2">
+                            <div><a href="">
+
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="48" rx="24" fill="white" />
+                                        <path
+                                            d="M26.2681 25.9441H29.5082L30.8042 20.7599H26.2681V18.1678C26.2681 16.8329 26.2681 15.5757 28.8602 15.5757H30.8042V11.221C30.3817 11.1653 28.7863 11.0396 27.1014 11.0396C23.5827 11.0396 21.0839 13.1871 21.0839 17.131V20.7599H17.1957V25.9441H21.0839V36.9605H26.2681V25.9441Z"
+                                            fill="#1E1E1E" />
+                                    </svg>
+
+                                </a></div>
+                            <div><a href="">
+
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="48" rx="24" fill="white" />
+                                        <g clip-path="url(#clip0_93_183)">
+                                            <mask id="mask0_93_183" style="mask-type:luminance"
+                                                maskUnits="userSpaceOnUse" x="12" y="12" width="24" height="24">
+                                                <path d="M12.383 12.3831H35.617V35.6171H12.383V12.3831Z" fill="white" />
+                                            </mask>
+                                            <g mask="url(#mask0_93_183)">
+                                                <path
+                                                    d="M30.6799 13.4717H34.243L26.4596 22.3902L35.6171 34.5284H28.4477L22.8284 27.1681L16.4059 34.5284H12.8394L21.1639 24.9858L12.3831 13.4733H19.735L24.8066 20.1996L30.6799 13.4717ZM29.4269 32.3908H31.4018L18.6562 15.498H16.5386L29.4269 32.3908Z"
+                                                    fill="#1E1E1E" />
+                                            </g>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_93_183">
+                                                <rect width="23.234" height="23.234" fill="white"
+                                                    transform="translate(12.383 12.3831)" />
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+
+                                </a></div>
+                            <div><a href="">
+
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="48" rx="24" fill="white" />
+                                        <path
+                                            d="M19.1209 12.3831H28.8792C32.5966 12.3831 35.617 15.4035 35.617 19.1209V28.8792C35.617 30.6662 34.9072 32.38 33.6436 33.6436C32.38 34.9072 30.6662 35.6171 28.8792 35.6171H19.1209C15.4034 35.6171 12.383 32.5967 12.383 28.8792V19.1209C12.383 17.3339 13.0929 15.6201 14.3565 14.3565C15.6201 13.0929 17.3339 12.3831 19.1209 12.3831ZM18.8885 14.7065C17.7794 14.7065 16.7156 15.1471 15.9313 15.9314C15.147 16.7157 14.7064 17.7794 14.7064 18.8886V29.1116C14.7064 31.4234 16.5767 33.2937 18.8885 33.2937H29.1115C30.2207 33.2937 31.2844 32.8531 32.0687 32.0688C32.853 31.2845 33.2936 30.2207 33.2936 29.1116V18.8886C33.2936 16.5768 31.4233 14.7065 29.1115 14.7065H18.8885ZM30.099 16.449C30.4841 16.449 30.8534 16.602 31.1258 16.8743C31.3981 17.1467 31.5511 17.516 31.5511 17.9011C31.5511 18.2863 31.3981 18.6556 31.1258 18.928C30.8534 19.2003 30.4841 19.3533 30.099 19.3533C29.7138 19.3533 29.3445 19.2003 29.0721 18.928C28.7998 18.6556 28.6468 18.2863 28.6468 17.9011C28.6468 17.516 28.7998 17.1467 29.0721 16.8743C29.3445 16.602 29.7138 16.449 30.099 16.449ZM24 18.1916C25.5405 18.1916 27.0179 18.8035 28.1073 19.8928C29.1966 20.9821 29.8085 22.4596 29.8085 24.0001C29.8085 25.5406 29.1966 27.018 28.1073 28.1073C27.0179 29.1966 25.5405 29.8086 24 29.8086C22.4595 29.8086 20.9821 29.1966 19.8928 28.1073C18.8035 27.018 18.1915 25.5406 18.1915 24.0001C18.1915 22.4596 18.8035 20.9821 19.8928 19.8928C20.9821 18.8035 22.4595 18.1916 24 18.1916ZM24 20.515C23.0757 20.515 22.1893 20.8822 21.5357 21.5357C20.8821 22.1893 20.5149 23.0758 20.5149 24.0001C20.5149 24.9244 20.8821 25.8108 21.5357 26.4644C22.1893 27.118 23.0757 27.4852 24 27.4852C24.9243 27.4852 25.8108 27.118 26.4644 26.4644C27.1179 25.8108 27.4851 24.9244 27.4851 24.0001C27.4851 23.0758 27.1179 22.1893 26.4644 21.5357C25.8108 20.8822 24.9243 20.515 24 20.515Z"
+                                            fill="#1E1E1E" />
+                                    </svg>
+
+                                </a></div>
+                            <div><a href="">
+
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="48" rx="24" fill="white" />
+                                        <path
+                                            d="M33.0354 12.3831C33.7201 12.3831 34.3767 12.655 34.8609 13.1392C35.345 13.6233 35.617 14.2799 35.617 14.9646V33.0355C35.617 33.7202 35.345 34.3768 34.8609 34.861C34.3767 35.3451 33.7201 35.6171 33.0354 35.6171H14.9645C14.2798 35.6171 13.6232 35.3451 13.1391 34.861C12.6549 34.3768 12.3829 33.7202 12.3829 33.0355V14.9646C12.3829 14.2799 12.6549 13.6233 13.1391 13.1392C13.6232 12.655 14.2798 12.3831 14.9645 12.3831H33.0354ZM32.39 32.3902V25.549C32.39 24.433 31.9467 23.3627 31.1575 22.5735C30.3684 21.7844 29.2981 21.3411 28.1821 21.3411C27.0849 21.3411 25.807 22.0123 25.1875 23.0191V21.5863H21.5862V32.3902H25.1875V26.0266C25.1875 25.0327 25.9878 24.2195 26.9817 24.2195C27.4609 24.2195 27.9206 24.4099 28.2595 24.7488C28.5984 25.0877 28.7888 25.5473 28.7888 26.0266V32.3902H32.39ZM17.3912 19.5598C17.9663 19.5598 18.5179 19.3313 18.9245 18.9247C19.3312 18.518 19.5597 17.9664 19.5597 17.3913C19.5597 16.1909 18.5916 15.2099 17.3912 15.2099C16.8126 15.2099 16.2578 15.4397 15.8487 15.8488C15.4396 16.2579 15.2097 16.8127 15.2097 17.3913C15.2097 18.5917 16.1907 19.5598 17.3912 19.5598ZM19.1853 32.3902V21.5863H15.6099V32.3902H19.1853Z"
+                                            fill="#1E1E1E" />
+                                    </svg>
+
+                                </a></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lenis
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // GSAP
+        gsap.registerPlugin(ScrollTrigger);
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+        gsap.ticker.lagSmoothing(0);
+
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+
+        let mouseX = 0, mouseY = 0, followerX = 0, followerY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            gsap.to(cursor, { x: mouseX, y: mouseY, duration: 0.1 });
+        });
+
+        function updateFollower() {
+            followerX += (mouseX - followerX) * 0.15;
+            followerY += (mouseY - followerY) * 0.15;
+            gsap.set(follower, { x: followerX - 20, y: followerY - 20 });
+            requestAnimationFrame(updateFollower);
+        }
+        updateFollower();
+
+        // Cursor interactions
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursor, { scale: 4, opacity: 0.3 });
+                gsap.to(follower, { scale: 1.5, borderColor: '#2563eb' });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursor, { scale: 1, opacity: 1 });
+                gsap.to(follower, { scale: 1, borderColor: 'rgba(37, 99, 235, 0.5)' });
+            });
+        });
+
+        // Premium staggered reveals for section contents
+        document.querySelectorAll('section').forEach(section => {
+            // Skip carousel sections to avoid visual jumping
+            if (section.querySelector('.animate-marquee, .animate-marquee-reverse, .animate-marquee-3')) {
+                return;
+            }
+            
+            // Target elements inside sections to reveal incrementally
+            const elementsToAnimate = section.querySelectorAll('h1, h2, h3, p, li, img');
+            if (elementsToAnimate.length > 0) {
+                gsap.from(elementsToAnimate, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    },
+                    y: 30,
+                    opacity: 0,
+                    duration: 1.2,
+                    stagger: 0.12,
+                    ease: "power3.out"
+                });
+            }
+        });
+
+        // Magnetic Buttons
+        document.querySelectorAll('a, button').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                gsap.to(btn, {
+                    x: (e.clientX - rect.left - rect.width / 2) * 0.2,
+                    y: (e.clientY - rect.top - rect.height / 2) * 0.2,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // Nav scroll effect
+        const nav = document.getElementById('about-nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+
+        console.log("About page engine active.");
+    </script>
+</body>
+
+</html>
